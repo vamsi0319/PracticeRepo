@@ -1,0 +1,23 @@
+<template>
+    <lightning-input type="checkbox" onchange={divHandler}></lightning-input>
+    
+    <template if:true={displayDiv}>
+        <div>true</div>
+    </template>
+
+    <template if:false={displayDiv}>
+        <div>false</div>
+    </template>
+
+    <template for:each={cityArray} for:item="city">
+        <p key={city}>{city}</p>
+
+    </template>
+    <h1>iterator</h1>
+
+    <template iterator:it={cityArray}>
+        <p key= {it.value}>{it.value}</p>
+
+    </template>
+
+</template>

@@ -1,0 +1,453 @@
+<apex:page showHeader="false" sidebar="false" controller="GanttChartv2_Ctrl">
+    <html>
+        <head>
+            <title>Project-360 View</title>
+             <apex:includeScript value="{!$Resource.ContactGantJs}"></apex:includeScript>
+             <apex:stylesheet value="{!$Resource.ContactGanttCSS}" />
+            
+            <style type="text/css">
+                
+                html, body{ height:100%; padding:0px; margin:0px; overflow: hidden;}
+                 .bg-loading {
+                    background-color: #fbfbfb;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    opacity:0.8;
+                    text-align:center; /* Align center inline elements */
+                    font: 0/0 a;
+                    z-index: 1150;
+                    position:       fixed;
+                    width:          100%;
+                    height:         100%;
+                }
+                
+                .gantt-myCss{
+                    font-weight:bold !important;
+                    color:white !important;
+                    background-color:green !important;
+                }
+
+                .bg-loading:before {
+                    content: ' ';
+                    display: inline-block;
+                    vertical-align: middle;
+                    height: 100%;
+                }
+                
+                .alert-success {
+                    background-color: #dff0d8;
+                    border-color: #d0e9c6;
+                    color: #3c763d;
+                }
+
+                .bg-loading img {
+                    vertical-align: middle;
+                    display: inline-block;
+                    width: 10%;
+                }
+                .important{
+                    border:2px solid rgba(250, 95, 95, 0.94);
+                    color:red;
+                    background:red;
+                }
+                .important .gantt_task_progress{
+                    background: #ff7775;
+                }
+
+               .gantt_task_cell.week_end{
+                    background-color: #EFF5FD;
+                }
+                .gantt_task_row.gantt_selected .gantt_task_cell.week_end{
+                    background-color: #F8EC9C;
+                }
+            </style>
+        </head>
+        <body>
+           <!--Loading Img  -->
+           
+            <div id="gantt_here" style='width:100%; height:100%;'></div>
+            <script type="text/javascript">
+            
+            
+            var demo_tasks = {
+                            "data":[
+                                  {"id":1, "text":"Project #1", "start_date":"01-04-2017", "duration":"11", "progress": 0.6, "open": true, "users": ["John", "Mike", "Anna"], "priority": "2"},
+                                  {"id":2, "text":"Task #1", "start_date":"03-04-2017", "duration":"5", "parent":"1", "progress": 1, "open": true, "users": ["John", "Mike"], "priority": "1"},
+                                  {"id":3, "text":"Task #2", "start_date":"02-04-2017", "duration":"7", "parent":"1", "progress": 0.5, "open": true, "users": ["Anna"], "priority": "1"},
+                                  {"id":4, "text":"Task #3", "start_date":"02-04-2017", "duration":"6", "parent":"1", "progress": 0.8, "open": true, "users": ["Mike", "Anna"], "priority": "2"},
+                              ]
+                              "links":[
+                                  {"id":"1","source":"1","target":"2","type":"1"},
+                                  {"id":"2","source":"2","target":"3","type":"0"},
+                                  {"id":"3","source":"3","target":"4","type":"0"}
+            
+                               ]  
+                          };
+            
+            
+            var newData = {
+                id : '',
+                text : '',
+                start_date : '',
+                duration : null,
+                users :[],
+                parent : '',
+                status:''
+            };
+            var contacts = [];
+            var demo_tasks;
+            const bgLoaderDiv = document.getElementsByClassName('bg-loading');
+            var projectId = '{!$CurrentPage.parameters.id}';
+            var holidays = [];
+
+            //Get the status
+            var taskStatus = [
+                {key:"Open",label:"Open"},
+                {key:"In Progress",label:"In Progress"},
+                {key:"Resolved",label:"Resolved"},
+                {key:"Closed",label:"Closed"},
+                {key:"Close",label:"Close"}
+            ];
+
+            gantt.locale.labels.section_assignedTo = "Assigned To";  
+            gantt.locale.labels.section_status = "Status";  
+            gantt.config.lightbox.sections = [
+                {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+                {name: "status", height: 22, map_to: "status", type: "select", options:taskStatus},
+                {name: "assignedTo", height: 22, map_to: "assignedTo", type: "select", options:contacts},
+                {name: "time", type: "duration", map_to: "auto"}
+            ];
+
+
+
+            //Get the contacts
+            GanttChartv2_Ctrl.getContacts( function(result,event) {
+                // body...
+                if(event.status) {
+                    // console.log(result); 
+                    result.forEach(function(con) {
+                        contacts.push({key:con.Id,label:con.Name});
+                    });   
+                    
+                }else {
+                    alert('got an exception '+event.message);
+                }
+            });
+
+            //Get the List-Of-Holidays
+            GanttChartv2_Ctrl.getHolidays(function(result,event) {
+                // body...
+                if(event.status) {
+                    console.log(result); 
+                    result.forEach(function(holiday) {
+                        holidays.push(new Date(holiday.ActivityDate));
+                    });   
+
+                     console.log(holidays);
+                       for(var i=0; i < holidays.length; i++){
+                            gantt.setWorkTime({
+                                date:holidays[i],
+                                hours:false
+                            });
+                        }
+
+                    /*
+                    var dateToStr = gantt.date.date_to_str("%d %M");
+                    gantt.message("Following holidays are excluded from working time:");
+
+                    for(var i =0; i < result.length; i++){
+                        // gantt.message(holiday.Name+' on '+holiday.ActivityDate);
+                        setTimeout(
+                            (function(i){
+                                return function(){
+                                     gantt.message(result[i].Name+' on '+dateToStr(new Date(result[i].ActivityDate)));
+                                } })(i)
+                            ,
+                            (i+1)*600
+                        );
+                    }  */
+
+                
+                
+                    
+                }else {
+                    alert('got an exception '+event.message);
+                }
+            });
+            
+          
+            //Get the Project-Task data - in - JsonData
+            console.log('projectId '+projectId);
+            GanttChartv2_Ctrl.getProjectInfo( projectId,function(result,event) {
+                // body...
+                if(event.status) {
+                    console.log(result); 
+
+                    demo_tasks = result;
+                    //working Time
+                    gantt.config.work_time = true;
+                    
+                    gantt.config.grid_width = 375;
+                    gantt.config.date_grid = "%F %d";
+                    
+
+                    gantt.config.scale_unit = "day";
+                    gantt.config.date_scale = "%D, %d";
+                    gantt.config.min_column_width = 60;
+                    gantt.config.duration_unit = "day";
+                    gantt.config.scale_height = 20*3;
+                    gantt.config.row_height = 30;
+
+                    gantt.init("gantt_here");
+                    gantt.parse(demo_tasks);
+
+                }else {
+                    alert('got an exception '+event.message);
+                }
+                //Stop loading
+                bgLoaderDiv[0].style.display = 'none';
+            });
+            
+        
+            gantt.templates.task_class = function(st,end,item){
+                return item.$level==0?"gantt_project":""
+            };
+            //Left-hand-side columns
+            gantt.config.columns = [
+                {name:"text",       label:"Name",  width:"*", tree:true },
+                {name:"start_time",   label:"Start date",  template:function(obj){
+                    return gantt.templates.date_grid(obj.start_date);
+                }, align: "center", width:60 },
+                {name:"end_date",   label:"End date",  template:function(obj){
+                    return gantt.templates.date_grid(obj.end_date);
+                }, align: "center", width:60 },
+                {name:"duration",   label:"Duration", align:"center", width:60},
+                {name:"add",        label:"",           width:44 }
+            ];
+           
+
+            var weekScaleTemplate = function(date){
+                var dateToStr = gantt.date.date_to_str("%d %M");
+                var weekNum = gantt.date.date_to_str("(week %W)");
+                var endDate = gantt.date.add(gantt.date.add(date, 1, "week"), -1, "day");
+                return dateToStr(date) + " - " + dateToStr(endDate) + " " + weekNum(date);
+            };
+
+            gantt.config.subscales = [
+                {unit:"month", step:1, date:"%F, %Y"},
+                {unit:"week", step:1, template:weekScaleTemplate}
+
+            ];
+
+            gantt.templates.task_cell_class = function(task, date){
+                if(!gantt.isWorkTime(date))
+                    return "week_end";
+                return "";
+            };
+
+            
+
+            // gantt.init("gantt_here");
+            // gantt.parse(demo_tasks);
+            
+            gantt.attachEvent("onLightboxSave", function(id, task, is_new){
+                               
+                console.log('task '+task.unscheduled);
+                console.log(task);
+                console.log('Is new Task ?'+is_new);
+
+                // if(task.parent === 0) task.parent = projectId;
+                 bgLoaderDiv[0].style.display = 'block';
+                 if(!task.text){
+                    gantt.message({type:"error", text:"Enter task description!"});
+                    return false;
+                }
+                if(!task.assignedTo){
+                    gantt.message({type:"error", text:"Choose a worker for this task!"});
+                    return false;
+                }
+
+                // if(is_new === false){
+                //  alert('Update the task..');
+                //  task.Id = null;
+                // }
+
+                var assignedToUser = [];
+                
+                assignedToUser.push(task.assignedTo);
+                
+                newData.text = task.text;
+                newData.start_date = convert(task.start_date);
+                newData.end_date = convert(task.end_date);
+                newData.duration = task.duration;
+                newData.parent = task.parent;
+                newData.users = assignedToUser;
+                newData.status = task.status;
+
+                 if(is_new === true){
+                    newData.Id = null;
+                }else{
+                    //alert('Update the task..'+task.id);
+                    console.log(task.id);
+                    newData.id = task.id;
+                }
+
+                console.log('Sending new Data '+newData);
+                
+                GanttChartv2_Ctrl.upsertTask(projectId, newData,is_new,
+
+                    function(result,event) {
+                    // body...
+                         bgLoaderDiv[0].style.display = 'none';
+                    if(event.status) {
+                        console.log(result); 
+                        if(is_new === true){
+                            //gantt.message({type:"success", text:"Enter task description!"});
+                            gantt.message({text:"Task Created successfully !",
+                                            expire:1000,
+                                            type:"alert-success"}); 
+                        }else{
+                            gantt.message({ type:"alert-success", text:"Task Updated successfully !" });
+                        }
+                        
+                        
+                    }else {
+                        
+                        alert('got an exception '+event.message);
+                    }
+                });
+                
+                return true;
+            });
+
+             function convert(str) {
+                    var date = new Date(str),
+                        mnth = ("0" + (date.getMonth()+1)).slice(-2),
+                        day  = ("0" + date.getDate()).slice(-2);
+                    return [mnth, day, date.getFullYear()].join("/");
+                }
+            
+
+
+            gantt.attachEvent("onLightboxDelete", function(id, task, is_new){
+                console.log(id);
+                
+                GanttChartv2_Ctrl.deleteTask(id,function(result,event) {
+                    // body...
+                    if(event.status) {
+                        console.log(result); 
+                        if(result === true){
+                            gantt.deleteTask(id);
+                            gantt.message("Delete successfully");
+                        }
+                        
+                    }else {
+                        alert('got an exception '+event.message);
+                    }
+                });
+
+                return true;
+            });
+            
+             var movedTask;
+                gantt.attachEvent("onTaskDrag", function(id, mode, task, original){
+
+                    // console.log('id '+id);
+                    console.log(mode);
+                    movedTask = task;
+
+                });
+                
+                  gantt.attachEvent("onAfterTaskDrag", function(id, mode, e){
+                      //console.log('id '+id);
+                      //console.log('Event '+e);
+                      //console.log(mode);
+                      //console.log(bgLoaderDiv[0]);
+                      bgLoaderDiv[0].style.display = 'block';
+                     var modes = gantt.config.drag_mode;
+                      if(id ==  movedTask.id){
+                          //console.log(movedTask);
+                             switch (mode){
+                                case modes.move:
+                                    console.log('move');
+                                     updateMoveTask(movedTask);
+                                break;
+                                case modes.resize:
+                                    console.log('resize');
+                                     updateMoveTask(movedTask);
+                                break;
+                                case modes.progress:
+                                    console.log('progress');
+                                     updateProgressTask(movedTask);
+                                break;
+                    
+                            }
+                      }else
+                          console.log('Old task ='+movedTask.id);
+
+                });
+            
+            
+            
+            var upTask = {
+                id:'',
+                start_date:'',
+                end_date :''
+            };
+            
+            
+            var updateMoveTask = function(task){
+                console.log('Task Moved ..');
+                console.log(task);
+                
+                upTask.start_date = convert(task.start_date);
+                upTask.end_date = convert(task.end_date);
+                upTask.id = task.id;
+               
+                console.log('Sending upTask ');
+                console.log(upTask);
+                GanttChartv2_Ctrl.udpateTask(upTask,
+
+                    function(result,event) {
+                    // body...
+                         bgLoaderDiv[0].style.display = 'none';
+                    if(event.status) {
+                        console.log(result); 
+                            gantt.message({ type:"alert-success", text:"Task Updated successfully !" });
+                        
+                    }else {
+                        
+                        alert('got an exception '+event.message);
+                    }
+                });
+            };
+            
+            var updateProgressTask = function(task){
+                console.log('Task progressed ..');
+                console.log(task);
+                GanttChartv2_Ctrl.udpateProgressTask(task.id,task.progress,
+
+                    function(result,event) {
+                    // body...
+                         bgLoaderDiv[0].style.display = 'none';
+                    if(event.status) {
+                        console.log(result); 
+                            gantt.message({ type:"alert-success", text:"Task Updated successfully !" });
+                        
+                    }else {
+                        
+                        alert('got an exception '+event.message);
+                    }
+                });
+            };
+            
+            var updateResizeTask = function(task){
+                console.log('Resize Moved ..');
+                console.log(task);
+            };
+            </script>
+        </body>
+    </html>
+</apex:page>

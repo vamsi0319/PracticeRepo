@@ -1,0 +1,15 @@
+<apex:page >
+    
+    <apex:pageBlock title="User Status">
+        <apex:pageBlockSection columns="1">
+        	{! $User.FirstName&' '&$User.LastName }
+            {! $User.Username}
+              <p> Today's Date is {! TODAY() } </p>
+			  <p> Next week it will be {! TODAY() + 7 } </p>
+              <p>The year today is{!Year(today())}</p>
+              <p>{! IF( CONTAINS('salesforce.com','force.com'), 'Yep', 'Nope') }</p>
+              <p>{! if (day(today())<15,'the day is less than 15','the day is more than 15')}  </p>
+              <p>{!if($User.IsActive,$User.Username,'user is not active')}</p>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>

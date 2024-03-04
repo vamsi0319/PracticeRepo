@@ -1,0 +1,18 @@
+<apex:page controller="DemoProjectController">
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageMessages id="showmsg"></apex:pageMessages>
+            <apex:pageBlockSection >
+                <apex:inputField value="{!acc.Name}"/>
+                <apex:inputField value="{!acc.AccountNumber}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+                <apex:inputField value="{!acc.Phone}"/>
+                <apex:inputField value="{!acc.Industry}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlocksection >
+                <apex:commandButton value="Create Account" action="{!CreateAccount}"/>
+            </apex:pageBlocksection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
