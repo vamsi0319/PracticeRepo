@@ -1,0 +1,26 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" controller = "opplist" access="global" >
+    <aura:attribute name="opportunities" type="list"/> 
+    <aura:handler name="init" value="{!this}" action="{!c.doinit}"/>
+    <table class="slds-table slds-table--bordered slds-table--striped slds-table--cell-buffer slds-table--fixed-layout">
+        <thead>
+            <tr class="slds-text-heading--label">
+                <th scope="col"><div class="slds-truncate" title="ID">ID</div></th>
+                <th scope="col"><div class="slds-truncate" title="Name">AccountId</div></th>
+                <th scope="col"><div class="slds-truncate" title="Type">probability</div></th>
+                <th scope="col"><div class="slds-truncate" title="Number Of Employees">stageName</div></th>
+                <th scope="col"><div class="slds-truncate" title="Ticker Symbol">Owner</div></th>
+            </tr>
+        </thead>
+        <tbody>
+            <aura:iteration items="{!v.opportunities}" var ="x">
+                <tr>
+                    <th scope="row"><div class="slds-truncate" title="{!x.Id}">{!x.Id}</div></th>
+                    <td><div class="slds-truncate" title="{!x.AccountId}">{!x.AccountId}</div></td>
+                    <td><div class="slds-truncate" title="{!x.Type}">{!x.Probability}</div></td>
+                    <td><div class="slds-truncate" title="{!x.NumberOfEmployees}">{!x.StageName}</div></td>
+                    <td><div class="slds-truncate" title="{!x.Owner}">{!x.Owner.Name}</div></td>
+                </tr>
+            </aura:iteration>                            
+        </tbody>
+    </table>
+</aura:component>
