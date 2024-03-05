@@ -1,0 +1,34 @@
+<template>
+<lightning-card  title="Wel COme Card">
+    <div class="slds-p-left_medium">
+            <p>{greeting}</p> 
+            <p>{Welcome}</p>
+    </div>
+    <lightning-button-group> 
+     <div class="slds-p-around_medium">
+        <!-- Brand variant: Identifies the primary action in a group of buttons -->
+        <lightning-button 
+        variant="brand" 
+        label="Click On Me"
+        data-inline="true"
+        title="Download action with brand variant" 
+        icon-name="standard:announcement" class="slds-m-left_x-small" 
+        onclick={clickhandler}></lightning-button>
+    
+      </div>
+     <div class="slds-p-around_medium">
+   
+        <!-- Brand variant: Identifies the primary action in a group of buttons -->
+        <lightning-button 
+        variant="brand" 
+        label="Revert me"
+        data-inline="true"
+        title="Download action with brand variant" 
+        icon-name="standard:announcement" class="slds-m-left_x-small" 
+        onclick={revertHandler}></lightning-button>
+   
+      </div>  
+   </lightning-button-group>
+  </lightning-card>
+  
+</template>

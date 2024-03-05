@@ -1,0 +1,23 @@
+<template>
+    <lightning-card title="Converting Lower Case To Upper Case">
+        <lightning-input label="First Name"
+        placeholder="Enter first name"
+        class="slds-p-around_small"
+        onchange={uppercase}
+        ></lightning-input>
+        <lightning-input label="Last Name"
+        placeholder="Enter last name"
+        class="slds-p-around_small"
+        onchange={uppercase}
+        ></lightning-input>
+        <lightning-button 
+        variant="brand"
+        label="Full Name"
+        class="slds-align_absolute-center" 
+        onclick={convertlowertoupper}></lightning-button>
+        <div class="slds-p-around_small">
+            <p >Full Name :{display}</p>
+        </div>
+    </lightning-card>
+    
+</template>
